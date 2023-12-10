@@ -58,16 +58,16 @@ parser.add_argument('--amplitude_scale',
                     type=float)
 parser.add_argument('--kernel',
                     help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
-                    default='RationalQuadraticKernel',
-                    # default='DotProductKernel',
+                    # default='RationalQuadraticKernel',
+                    default='DotProductKernel',
                     # default = 'MaternKernel25',
                     type=str)
 
-parser.add_argument('--kname',
-                    help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
-                    # default='RQ Kernel',
-                    default='DP Kernel',
-                    type=str)
+# parser.add_argument('--kname',
+#                     help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
+#                     # default='RQ Kernel',
+#                     default='DP Kernel',
+#                     type=str)
 opt = parser.parse_args()
 
 
@@ -174,7 +174,7 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
 
     if model_name == 'oodgp':
         # plt.title(f'GP with {opt.kname}, RMSE={error:.4f}')
-        plt.text(4.7,2,f'GP-{opt.kname} \nRMSE={error:.4f}')
+        plt.text(4.7,2,f'GP-{opt.kernel} \nRMSE={error:.4f}')
     else:
         plt.title(f'GP, RMSE={error:.4f}')
 

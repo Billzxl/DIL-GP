@@ -6,7 +6,7 @@ import numpy as np
 import random
 import torch
 import os
-from OODGP_menvs import OODGP
+from OODGP import OODGP
 from gp import GP
 from torch.optim import SGD
 # from get_my_data import get_dataset
