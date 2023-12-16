@@ -140,8 +140,8 @@ def main():
             gp = OODGP(opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,
                     opt.length_scale, opt.noise_scale, opt.amplitude_scale).to(device)
         elif model_name == 'gp_kernel':
-            kernel = RationalQuadraticKernel()
-            # kernel = DotProductKernel()
+            # kernel = RationalQuadraticKernel()
+            kernel = DotProductKernel()
             
             gp = OODGPKernel(kernel, opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans).to(device)
         else:

@@ -23,7 +23,7 @@ def setup_seed(seed):
 
 def get_dataset(dataset_name):
     setup_seed(0)
-
+    train_names = None
     if dataset_name == "synthetic":
         X = torch.randn(100,1)
         f = torch.sin(X * 2 * np.pi /4).flatten()
@@ -37,89 +37,10 @@ def get_dataset(dataset_name):
 
         train_data = torch.cat([X, X2[:15]], dim=0)
         train_label = torch.cat([y, y2[:15]], dim=0)
+        train_names = [1 for i in range(100)] + [0 for i in range(15)]
         valid_data = X2[20:]
         valid_label = y2[20:]
-        
-    elif dataset_name == "syn2":
-        
-        T1 = 0.2
-        a1 = 1/T1
-        T2 = 0.2
-        a2 = 1/T2
-        k = 1
 
-        b1 = 2*k*np.pi+np.pi/2-0.3*a1
-
-        b2 = 2*k*np.pi+np.pi/2-0.7*a2
-
-        # 生成两个高斯分布
-        mean1 = [0.3, 0.3]
-        cov1 = [[0.01, 0], [0, 0.01]]
-        x1, y1 = np.random.multivariate_normal(mean1, cov1, 20).T
-
-        x1 = np.clip(x1, 0.05, 0.95)
-        y1 = np.clip(y1, 0.05, 0.95)
-        x1 = torch.Tensor(x1).unsqueeze(1)
-        # print(x1.shape)
-        y1 = torch.Tensor(y1).unsqueeze(1)
-        z = 1.5*np.sin(x1 * a1 + b1) + 1.5*np.sin(y1 * a1 + b1) + torch.randn_like(x1) * 0.1
-        X = torch.cat((x1,y1),dim=1)
-
-        mean2 = [0.7, 0.7]
-        cov2 = [[0.01, 0], [0, 0.01]]
-        x2, y2 = np.random.multivariate_normal(mean2, cov2, 15).T
-
-        x2 = np.clip(x2, 0.05, 0.95)
-        y2 = np.clip(y2, 0.05, 0.95)
-        x2 = torch.Tensor(x2).unsqueeze(1)
-        y2 = torch.Tensor(y2).unsqueeze(1)
-        z2 = 2*np.sin(x2*a2+b2) + 4*np.sin(y2*a2+b2) + torch.randn_like(x2) * 0.05
-        
-        X2 = torch.cat((x2,y2),dim=1)
-        # 划分 domain
-        # n = len(x2)
-        # idx = np.random.choice(n, int(0.2*n), replace=False)
-        # x2_domain1, y2_domain1 = x2[idx], y2[idx]
-        # x_domain2, y_domain2 = np.delete(x2, idx), np.delete(y2, idx)
-
-        # x_domain1 = np.concatenate((x1,x2_domain1),axis=0)
-        # y_domain1 = np.concatenate((y1,y2_domain1),axis=0)
-
-        
-        train_data = torch.cat([X, X2[:5]], dim=0)
-        train_label = torch.cat([z, z2[:5]], dim=0)
-        # valid_data = X2[5:]
-        # valid_label = z2[5:]
-        
-        
-        n = 100
-        x = torch.linspace(0, 1, n)
-        y = torch.linspace(0, 1, n)
-
-        # 使用 torch.meshgrid() 生成网格点坐标
-        xx, yy = torch.meshgrid(x, y)
-        xx = xx.reshape(-1, 1)
-        yy = yy.reshape(-1, 1)
-        # print(xx)
-        # print(yy)
-        # assert 0
-        label = 2*np.sin(xx*a2+b2) + 4*np.sin(yy*a2+b2) + torch.randn_like(yy) * 0.05
-        # 将 xx 和 yy 拼接成一个 (n**2, 2) 的 Tensor
-        data = torch.cat((xx, yy), dim=1)
-
-        # # 按照步长 t 对 points 进行缩放
-        # points = points * t
-
-        # 打印生成的 Tensor
-        # print(points)
-
-        # x_domain1, y_domain1 = train_data,train_label
-        # x_domain2, y_domain2 = valid_data ,valid_label
-
-
-        valid_data = data
-        valid_label = label
-        
     elif dataset_name == "housing_time_split":
 
         data = pd.read_csv("data.csv") \
@@ -202,8 +123,25 @@ def get_dataset(dataset_name):
         valid_label = torch.from_numpy(target_np[valid_indices]).float()
     
     elif dataset_name == "auto_mobile":
+        '''
+        valid: ['sedan', 'hardtop']
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=100, gplr=0.1, lambdae=3.0, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) 0.81747425
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=100, gplr=0.1, lambdae=1e-21, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) 0.83216405
+        '''
+        '''
+        kfold:
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=100, gplr=0.1, lambdae=10, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) 0.85788155
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=300, gplr=0.1, lambdae=1e-21, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) 0.88315356
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=100, gplr=0.1, lambdae=1e-21, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) 0.8919655
+        '''
+        '''
+        valid: ['convertible', 'sedan', 'hardtop']
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=100, gplr=1, lambdae=1e-10, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) error 0.8648686
+        Namespace(amplitude_scale=1.0, eistep=1, envlr=0.01, epoch=100, gplr=1, lambdae=30.0, length_scale=1.0, noise_scale=1.0, seed=0, usekmeans=True) error 0.8073124
+        '''
 
-        #跑50轮取最好结果
+        car_names = []
+
         with open("uci_datasets/auto_mobile/imports-85.data", "r") as f:
             data = f.readlines()
         
@@ -212,10 +150,9 @@ def get_dataset(dataset_name):
 
         indices = []
         for i, item in enumerate(data):
-            if item[6] in ['hatchback']:#valid list
+            # print(item[6])
+            if item[6] in ['convertible', 'sedan', 'hardtop']:
                 indices.append(i)
-
-        # print('?', len(indices), len(data))
 
         data = [[item[0]] + item[3:26] for item in data]
         data_np = list2numpy(data)
@@ -231,9 +168,13 @@ def get_dataset(dataset_name):
 
         valid_indices = indices
         train_indices = [i for i in range(len(data_np)) if i not in indices]
+        train_names = [item[4] for i, item in enumerate(data) if i not in indices]
+        # print('train_names', train_names)
+        # train_indices = indices
+        # valid_indices = [i for i in range(len(data_np)) if i not in indices]
         np.random.shuffle(valid_indices)
-        train_indices = np.concatenate([train_indices, valid_indices[:15]], axis=0)
-        valid_indices = valid_indices[15:]
+        # train_indices = np.concatenate([train_indices, valid_indices[:15]], axis=0)
+        # valid_indices = valid_indices[15:]
 
         train_data = torch.from_numpy(data_np[train_indices]).float()
         train_label = torch.from_numpy(target_np[train_indices]).float()
@@ -353,8 +294,10 @@ def get_dataset(dataset_name):
     np.random.shuffle(shuffle_indices)
     train_data = train_data[shuffle_indices]
     train_label = train_label[shuffle_indices]
+    # train_names = [train_names[idx] for idx in shuffle_indices]
+    train_names = []
     # assert False
-    return train_data, train_label, valid_data, valid_label
+    return train_data, train_label, valid_data, valid_label, train_names
                     
 
 
@@ -369,13 +312,15 @@ def list2numpy(labels):
             float(try_label)
             label_np = np.array(labels_i, dtype=np.float32).reshape(-1, 1)
         except:
-            label_np = np.array(strlist2onehot(labels_i), dtype=np.float32)
+            # label_np = np.array(strlist2onehot(labels_i), dtype=np.float32)
+            continue
             # print(try_label, label_np.shape)
         
         label_float.append(label_np)
 
     label_float = np.concatenate(label_float, axis=1)
     return label_float
+
 
 def strlist2onehot(label_str):
     unique_items = list(set(label_str))

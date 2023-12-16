@@ -77,7 +77,7 @@ dataset_name = "auto_mobile"
 # dataset_name = "housing_time_split"
 
 # dataset_name = "synthetic"
-model_name = 'oodgp'
+model_name = 'gp'
 device = torch.device('cuda') # or torch.device('cpu')
 
 
@@ -148,7 +148,7 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
 
 def main():
     global opt
-    train_data, train_label, valid_data, valid_label, train_names = get_dataset(dataset_name)
+    train_data, train_label, valid_data, valid_label,_ = get_dataset(dataset_name)
     train_data, train_label, valid_data, valid_label = [item.to(device) for item in \
                                                         [train_data, train_label, valid_data, valid_label]]
     
