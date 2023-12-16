@@ -11,6 +11,7 @@ We'll organize **requirement.txt** shortly.
 
 ## How to Run
 
+**We'll integrate and beautify the code shortly.**
 ```
 cd DIL-GP/
 ```
@@ -49,4 +50,4 @@ python train_gp_kernel_real.py
 python train_rf_mlp_real.py
 ```
 
-**We'll integrate and beautify the code shortly.**
+
