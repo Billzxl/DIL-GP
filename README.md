@@ -41,7 +41,3 @@ python train_gp_kernel_real.py
 ```
 python train_rf_mlp_real.py
 ```
-
-
-
- **Result:**
