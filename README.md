@@ -3,18 +3,45 @@ The official implementation of **Domain Invariant Learning for Gaussian Processe
 
 
 ## How to Run
-**easily run code by:**
 
-    # 1D Synthetic Dataset 
+```
+cd DIL-GP
+```
+---
+### 1D Synthetic Dataset
 
-    python train_gp_dilgp.py
-  
-    python train_gp_kernel.py
-  
-    python train_sklearn.py
 
-**adjust hyperparameters by:**
-    
-    TBD
+**run GP, DIL-GP**
+```
+python train_gp_dilgp_syn_1d.py
+```
+
+**run GP-RQ Kernel, GP-DP Kernel**
+```
+python train_gp_kernel_syn_1d.py
+```
+
+**run RF, MLP**
+```
+python train_rf_mlp_syn_1d.py
+```
+---
+### Automobile Dataset
+**run GP, DIL-GP**
+```
+python train_gp_dilgp_real.py
+```
+
+**run GP-RQ Kernel, GP-DP Kernel**
+```
+python train_gp_kernel_real.py
+```
+
+**run RF, MLP**
+```
+python train_rf_mlp_real.py
+```
+
+
 
  **Result:**
