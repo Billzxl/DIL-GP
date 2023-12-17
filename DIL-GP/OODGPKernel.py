@@ -57,8 +57,9 @@ class OODGPKernel(nn.Module):
                 self.env_w = torch.tensor(env_labels, dtype=torch.float32, device=X.device).requires_grad_()
         else:
             self.env_w = torch.randn(len(X), device=X.device, requires_grad = True)
-
-        env_w = self.env_w
+            
+        env_w = nn.Parameter(self.env_w)
+        # env_w = self.env_w
         opti_env = optim.Adam([env_w], lr=self.envlr)
 
         D = X.shape[1]

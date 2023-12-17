@@ -26,7 +26,6 @@ parser.add_argument('--dataset_name',
                     choices= ['synthetic'],
                     type=str)
 
-
 parser.add_argument('--envlr',
                     help='learning rate for env_w',
                     default=0.001,
