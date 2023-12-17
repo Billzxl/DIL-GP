@@ -28,28 +28,33 @@ python train_gp_dilgp_syn_1d.py --model_name dilgp
 
 **run GP-RQ Kernel, GP-DP Kernel**
 ```
-python train_gp_kernel_syn_1d.py
+python train_gp_kernel_syn_1d.py --kernel RationalQuadraticKernel
+python train_gp_kernel_syn_1d.py --kernel DotProductKernel
 ```
 
 **run RF, MLP**
 ```
-python train_rf_mlp_syn_1d.py
+python train_rf_mlp_syn_1d.py --model_name rf
+python train_rf_mlp_syn_1d.py --model_name mlp
 ```
 ---
 ### Automobile Dataset
 **run GP, DIL-GP**
 ```
-python train_gp_dilgp_real.py
+python train_gp_dilgp_real.py --model_name gp
+python train_gp_dilgp_real.py --model_name dilgp
 ```
 
 **run GP-RQ Kernel, GP-DP Kernel**
 ```
-python train_gp_kernel_real.py
+python train_gp_kernel_real.py --kernel RationalQuadraticKernel
+python train_gp_kernel_real.py --kernel DotProductKernel
 ```
 
 **run RF, MLP**
 ```
-python train_rf_mlp_real.py
+python train_rf_mlp_real.py --model_name rf
+python train_rf_mlp_real.py --model_name mlp
 ```
 
 
