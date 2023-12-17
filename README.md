@@ -22,7 +22,8 @@ cd DIL-GP/
 
 **run GP, DIL-GP**
 ```
-python train_gp_dilgp_syn_1d.py
+python train_gp_dilgp_syn_1d.py --model_name gp
+python train_gp_dilgp_syn_1d.py --model_name dilgp
 ```
 
 **run GP-RQ Kernel, GP-DP Kernel**
