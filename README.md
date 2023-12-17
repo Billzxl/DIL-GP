@@ -41,6 +41,30 @@ python train_rf_mlp_syn_1d.py --model_name rf
 python train_rf_mlp_syn_1d.py --model_name mlp
 ```
 ---
+### 2D Synthetic Dataset
+
+**run all following methods**
+```
+./run_syn_2d.sh
+```
+**run GP, DIL-GP**
+```
+python train_gp_dilgp_syn_2d.py --model_name gp
+python train_gp_dilgp_syn_2d.py --model_name dilgp
+```
+
+**run GP-RQ Kernel, GP-DP Kernel**
+```
+python train_gp_kernel_syn_2d.py --kernel RationalQuadraticKernel
+python train_gp_kernel_syn_2d.py --kernel DotProductKernel
+```
+
+**run RF, MLP**
+```
+python train_rf_mlp_syn_2d.py --model_name rf
+python train_rf_mlp_syn_2d.py --model_name mlp
+```
+---
 ### Automobile Dataset
 
 **run all following methods**
