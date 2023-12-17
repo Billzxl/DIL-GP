@@ -19,7 +19,10 @@ cd DIL-GP/
 ---
 ### 1D Synthetic Dataset
 
-
+**run all following methods**
+```
+./run_syn_1d.sh
+```
 **run GP, DIL-GP**
 ```
 python train_gp_dilgp_syn_1d.py --model_name gp
@@ -39,6 +42,11 @@ python train_rf_mlp_syn_1d.py --model_name mlp
 ```
 ---
 ### Automobile Dataset
+
+**run all following methods**
+```
+./run_real.sh
+```
 **run GP, DIL-GP**
 ```
 python train_gp_dilgp_real.py --model_name gp
