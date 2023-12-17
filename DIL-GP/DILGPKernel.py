@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 
-class OODGPKernel(nn.Module):
+class DILGPKernel(nn.Module):
     def __init__(self, kernel, envlr=1e-3, eistep=3, lambdae=1e-10, use_kmeans=True):
         super().__init__()
         lambdae = 1e-10

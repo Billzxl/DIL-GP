@@ -6,7 +6,7 @@ import numpy as np
 import random
 import torch
 import os
-from OODGPKernel import OODGPKernel
+from DILGPKernel import DILGPKernel
 from kernels import *
 from gp import GP
 from torch.optim import SGD
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 
-parser = argparse.ArgumentParser(description='OODGP Tuning')
+parser = argparse.ArgumentParser(description='DILGP Tuning')
 parser.add_argument('--envlr',
                     help='learning rate for env_w',
                     default=0.001,
@@ -34,7 +34,7 @@ parser.add_argument('--eistep',
                     type=int)
 parser.add_argument('--lambdae',
                     help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
-                    default=0.00000000000000000000000000010,
+                    default=0.5,
                     type=float)
 parser.add_argument('--seed',
                     help='random seed',
@@ -60,7 +60,6 @@ parser.add_argument('--kernel',
                     help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
                     default='RationalQuadraticKernel',
                     # default='DotProductKernel',
-                    # default = 'MaternKernel25',
                     type=str)
 
 # parser.add_argument('--kname',
@@ -83,7 +82,7 @@ def setup_seed(seed):
 
 # setup_seed(0)
 dataset_name = 'synthetic'
-model_name = 'oodgp'
+model_name = 'dilgp'
 
 def get_dataset(dataset_name):
     setup_seed(0)
@@ -172,13 +171,13 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
     
     # plt.fill_between(grid.flatten(), y1=mu+std, y2=mu-std, alpha=0.3, color='y')
 
-    if model_name == 'oodgp':
+    if model_name == 'dilgp':
         # plt.title(f'GP with {opt.kname}, RMSE={error:.4f}')
         plt.text(4.7,2,f'GP-{opt.kernel} \nRMSE={error:.4f}')
     else:
         plt.title(f'GP, RMSE={error:.4f}')
 
-    plt.savefig(f'debug/6_train_oodgp_result_{opt.kernel}.png', bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
+    plt.savefig(f'result/gp_{opt.kernel}_result.png', bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
 
     plt.cla()
 
@@ -197,70 +196,35 @@ def main():
     ratio0 = None
     ll0 = None
     std0 = None
-    gplrs = [0.01, 0.003, 0.001, 0.0003, 0.0001]
-    # gplrs = [0.001]
-    for i, gplr in enumerate(gplrs):
-        opt.gplr = gplr
-        plt.rcParams.update({'font.size': 18})
-        setup_seed(opt.seed)
-        # ONLY for regression !
-        # TODO： add classification
-        kernel = eval(opt.kernel)()
-        # kernel = Matern(length_scale=1.0, length_scale_bounds=(1e-05, 100000.0), nu=2.5)
-        gp = OODGPKernel(kernel, opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,)#.cuda()
+    # gplrs = [0.01, 0.003, 0.001, 0.0003, 0.0001]
+    # # gplrs = [0.001]
+    # for i, gplr in enumerate(gplrs):
+        # opt.gplr = gplr
+    plt.rcParams.update({'font.size': 18})
+    setup_seed(opt.seed)
+    # ONLY for regression !
+    # TODO： add classification
+    kernel = eval(opt.kernel)()
+    # kernel = Matern(length_scale=1.0, length_scale_bounds=(1e-05, 100000.0), nu=2.5)
+    gp = DILGPKernel(kernel, opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,)#.cuda()
 
-        optimizer = SGD(gp.parameters(), lr=opt.gplr)
+    optimizer = SGD(gp.parameters(), lr=opt.gplr)
 
-        gp.fit(train_data, train_label)
+    gp.fit(train_data, train_label)
 
-        l_error = []; l_std = []; l_ratio = []
-        test_error, test_std, _, ll = test(gp, valid_data, valid_label)
-        l_error.append(test_error.mean())
-        l_std.append(test_std.mean())
+    for i in tqdm(range(opt.epoch)):
+        d_train = gp.train_step(train_data, train_label, optimizer)
 
-        l_loss = []; l_length = []; l_noise = []; l_amp = [];
-        ratio = 0
-        for i in tqdm(range(opt.epoch)):
-            d_train = gp.train_step(train_data, train_label, optimizer)
-            l_loss.append(d_train['loss'])
-            
-            # print(d_train['loss'])
-            with torch.no_grad():
-                test_error, test_std, ratio, ll = test(gp, valid_data, valid_label)
-                l_error.append(test_error.mean())
-                l_std.append(test_std.mean())
-
-        # print('l_error', l_error) # TODO: check other standards?
-        error = l_error[-1]
-        test_plot(gp, train_data, train_label, valid_data, valid_label, error)
-
-        error_diff_seed.append(error)
-        ratio_diff_seed.append(ratio)
-        ll_diff_seed.append(ll)
-        std_diff_seed.append(test_std)
-        print(error, ratio, ll, test_std)
-
-        if np.abs(opt.gplr - 0.001) < 1e-10:
-            error0  = error
-            ratio0 = ratio
-            ll0 = ll
-            std0 = test_std
-
-    print(error_diff_seed)
-    diff = np.abs(np.array(error_diff_seed) - error0)
-    print(error0, diff.max())
-
-    diff = np.abs(np.array(ratio_diff_seed) - ratio0)
-    print(ratio0, diff.max())
-
-    diff = np.abs(np.array(ll_diff_seed) - ll0)
-    print('ll', ll0, diff.max())
-
-    diff = np.abs(np.array(std_diff_seed) - std0)
-    print('std', std0, diff.max())
+    with torch.no_grad():
+        test_error, test_std, ratio, ll = test(gp, valid_data, valid_label)
 
 
+    test_plot(gp, train_data, train_label, valid_data, valid_label, test_error)
 
+
+    print('Model: gp with',opt.kernel)
+    print('RMSE: ',test_error)
+    print('Coverage Rate: ', ratio)
 
 
 if __name__ == "__main__":

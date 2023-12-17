@@ -6,7 +6,7 @@ import numpy as np
 import random
 import torch
 import os
-from OODGP import OODGP
+from DILGP import DILGP
 from gp import GP
 from torch.optim import SGD
 from tqdm import tqdm
@@ -16,7 +16,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 from get_my_data import get_dataset
 
-parser = argparse.ArgumentParser(description='OODGP Tuning')
+parser = argparse.ArgumentParser(description='DILGP Tuning')
+parser.add_argument('--model_name',
+                    help='choose model, rf or mlp',
+                    default='rf',
+                    choices= ['rf','mlp'],
+                    type=str)
 parser.add_argument('--envlr',
                     help='learning rate for env_w',
                     default=0.001,
@@ -74,7 +79,7 @@ def setup_seed(seed):
 # dataset_name = 'diabetes'
 # dataset_name = 'auto_mobile'
 dataset_name = 'housing_time_split'
-model_name = 'mlp'
+model_name = opt.model_name
 
 
 
@@ -107,8 +112,8 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
 
 
     # plt.title(f'After hyperparameter optimization, error={error:.4f}')
-    # if model_name == 'oodgp':
-    #     plt.savefig(f'debug/train_oodgp_result.png')
+    # if model_name == 'dilgp':
+    #     plt.savefig(f'debug/train_dilgp_result.png')
     # else:
     #     plt.savefig(f'debug/train_gp_result.png')
     if model_name == "mlp":
@@ -131,7 +136,7 @@ def main():
 
     error_diff_seed = []
     error0 = None
-    for i in range(10):
+    for i in range(1):
         if model_name == "mlp":
             regr = MLPRegressor(hidden_layer_sizes=(64, 64, 64), random_state=i, max_iter=5000).fit(train_data, train_label)
             # regr = MLPRegressor(random_state=1, max_iter=500,hidden_layer_sizes=).fit(train_data, train_label)
@@ -140,31 +145,32 @@ def main():
 
         regr.fit(train_data, train_label)
 
-        l_error = [];
+        # l_error = [];
         test_error = test(regr, valid_data, valid_label)
-        l_error.append(test_error.mean())
+        # l_error.append(test_error.mean())
 
-        error = l_error[-1]
+        # error = l_error[-1]
         # test_plot(regr, train_data, train_label, valid_data, valid_label, error)
         # fig, axs = plt.subplots(ncols=5, figsize=(20,4))
         # axs[4].plot(np.stack(l_error)); axs[4].set_title('Valid Error'); axs[4].set_xlabel('iteration');
 
-        if model_name == "mlp":
-            plt.savefig('debug/train_mlp.png')
-        else:
-            plt.savefig('debug/train_gp_regr.png')
-        
-        plt.cla()
+        # if model_name == "mlp":
+        #     plt.savefig('debug/train_mlp.png')
+        # else:
+        #     plt.savefig('debug/train_gp_regr.png')
+        print('Model: ',opt.model_name)
+        print('RMSE: ',test_error)   
+        # plt.cla()
 
-        error_diff_seed.append(error)
-        print(error)
+        # error_diff_seed.append(error)
+        # print(error)
 
-        if (model_name == "mlp" and i == 1) or (model_name != "mlp" and i == 0):
-            error0  = error
+        # if (model_name == "mlp" and i == 1) or (model_name != "mlp" and i == 0):
+        #     error0  = error
 
-    print(error_diff_seed)
-    diff = np.abs(np.array(error_diff_seed) - error0)
-    print(error0, diff.max())
+    # print(error_diff_seed)
+    # diff = np.abs(np.array(error_diff_seed) - error0)
+    # print(error0, diff.max())
 
     
 

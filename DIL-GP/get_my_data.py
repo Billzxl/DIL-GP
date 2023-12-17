@@ -192,7 +192,7 @@ def get_dataset(dataset_name):
         valid_label = (valid_label - train_label_mean) / (train_label_std + 1e-5)
 
 
-    print(train_data.shape, train_label.shape, valid_data.shape, valid_label.shape)
+    # print(train_data.shape, train_label.shape, valid_data.shape, valid_label.shape)
     # shuffle
     shuffle_indices = np.arange(len(train_data))
     np.random.shuffle(shuffle_indices)

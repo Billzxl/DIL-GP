@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 from tqdm import tqdm
 
 #envlr=1e-3
-class OODGP(nn.Module):
+class DILGP(nn.Module):
     def __init__(self, envlr=0.1, eistep=3, lambdae=0.5, use_kmeans=True,
                 length_scale=1.0, noise_scale=1.0, amplitude_scale=1.0):
         super().__init__()
@@ -70,8 +70,8 @@ class OODGP(nn.Module):
             # else:
             #     self.env_w = torch.tensor(self.env_labels, dtype=torch.float32, device=X.device).requires_grad_()
         
-        # env_w = nn.Parameter(self.env_w)
-        env_w = self.env_w
+        env_w = nn.Parameter(self.env_w)
+        # env_w = self.env_w
         opti_env = optim.Adam([env_w], lr=self.envlr)
 
         D = X.shape[1]

@@ -3,7 +3,7 @@ import numpy as np
 import random
 import torch
 import os
-from OODGP import OODGP
+from DILGP import DILGP
 from gp import GP
 from torch.optim import SGD
 # from get_my_data import get_dataset
@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 from torch.distributions.normal import Normal
 from matplotlib.transforms import Bbox
 
-parser = argparse.ArgumentParser(description='OODGP Tuning')
+parser = argparse.ArgumentParser(description='DILGP Tuning')
 
 parser.add_argument('--model_name',
                     help='choose model, gp or dilgp',
-                    default='dilgp',
+                    default='gp',
                     choices= ['gp','dilgp'],
                     type=str)
 
@@ -169,12 +169,12 @@ def plot(gp, train_data, train_label, test_data, test_label, error):
     if opt.model_name == 'dilgp':
         plt.text(2.5,3,f'DIL-GP, RMSE={error:.4f}')
         # plt.title(f'DIL-GP, RMSE={error:.4f}')
-        plt.savefig(f'debug/dilgp_result.png', bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
+        plt.savefig(f'result/dilgp_result.png', bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
 
     else:
         # plt.title(f'GP, RMSE={error:.4f}')
         plt.text(3.5,3,f'GP, RMSE={error:.4f}')
-        plt.savefig(f'debug/gp_result.png',
+        plt.savefig(f'result/gp_result.png',
                     bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
               
     plt.cla()  
@@ -200,7 +200,7 @@ def main():
     setup_seed(opt.seed)
 
     if opt.model_name == 'dilgp':
-        gp = OODGP(opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,
+        gp = DILGP(opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,
                 opt.length_scale, opt.noise_scale, opt.amplitude_scale)#.cuda()
     else:
         gp = GP(opt.length_scale, opt.noise_scale, opt.amplitude_scale)

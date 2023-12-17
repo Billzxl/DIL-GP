@@ -6,7 +6,7 @@ import numpy as np
 import random
 import torch
 import os
-from OODGP import OODGP
+from DILGP import DILGP
 from gp import GP
 from torch.optim import SGD
 from tqdm import tqdm
@@ -16,7 +16,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 
 
-parser = argparse.ArgumentParser(description='OODGP Tuning')
+parser = argparse.ArgumentParser(description='DILGP Tuning')
+parser.add_argument('--model_name',
+                    help='choose model, rf or mlp',
+                    default='rf',
+                    choices= ['rf','mlp'],
+                    type=str)
 parser.add_argument('--envlr',
                     help='learning rate for env_w',
                     default=0.001,
@@ -73,7 +78,7 @@ def setup_seed(seed):
 # setup_seed(0)
 dataset_name = 'synthetic'
 # model_name = 'mlp'
-model_name = 'rf'
+model_name = opt.model_name
 
 
 def get_dataset(dataset_name):
@@ -143,18 +148,18 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
     #          c=np.array((242, 102, 171)).reshape(1, 3)/255, s=25)
 
     # plt.title(f'After hyperparameter optimization, error={error:.4f}')
-    # if model_name == 'oodgp':
-    #     plt.savefig(f'debug/train_oodgp_result.png')
+    # if model_name == 'dilgp':
+    #     plt.savefig(f'debug/train_dilgp_result.png')
     # else:
     #     plt.savefig(f'debug/train_gp_result.png')
     if model_name == "mlp":
         # plt.title(f'MLP, RMSE={error:.4f}')
         plt.text(3.3,3.4,f'MLP, RMSE={error:.4f}')
-        plt.savefig(f'debug/6_train_mlp_result.png', bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
+        plt.savefig(f'result/mlp_result.png', bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
     else:
         # plt.title(f'RandomForest, RMSE={error:.4f}')
         plt.text(3.7,3,f'RF, RMSE={error:.4f}')
-        plt.savefig(f'debug/6_train_regr_result.png',  bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
+        plt.savefig(f'result/rf_result.png',  bbox_inches=Bbox.from_bounds(0.99, 0.31, 6.23, 2.34))
 
     plt.cla()
 
@@ -165,9 +170,9 @@ def main():
 
     setup_seed(opt.seed)
 
-    error_diff_seed = []
-    error0 = None
-    for i in range(10):
+    # error_diff_seed = []
+    # error0 = None
+    for i in range(1):
         if model_name == "mlp":
             regr = MLPRegressor(hidden_layer_sizes=(64, 64, 64), random_state=i, max_iter=5000).fit(train_data, train_label)
             # regr = MLPRegressor(random_state=1, max_iter=500,hidden_layer_sizes=).fit(train_data, train_label)
@@ -176,33 +181,32 @@ def main():
 
         regr.fit(train_data, train_label)
 
-        l_error = [];
+        # l_error = [];
         test_error = test(regr, valid_data, valid_label)
-        l_error.append(test_error.mean())
+        # l_error.append(test_error.mean())
 
-        error = l_error[-1]
+        # error = l_error[-1]
 
-        fig, axs = plt.subplots(ncols=5, figsize=(20,4))
-        axs[4].plot(np.stack(l_error)); axs[4].set_title('Valid Error'); axs[4].set_xlabel('iteration');
+        # fig, axs = plt.subplots(ncols=5, figsize=(20,4))
+        # axs[4].plot(np.stack(l_error)); axs[4].set_title('Valid Error'); axs[4].set_xlabel('iteration');
 
 
-        if model_name == "mlp":
-            plt.savefig('debug/train_mlp.png')
-        else:
-            plt.savefig('debug/train_gp_regr.png')
+        # if model_name == "mlp":
+        #     plt.savefig('debug/train_mlp.png')
+        # else:
+        #     plt.savefig('debug/train_gp_regr.png')
         
-        plt.cla()
+        # plt.cla()
 
-        error_diff_seed.append(error)
-        print(error)
+        # error_diff_seed.append(error)
+        # print(error)
 
-        if (model_name == "mlp" and i == 1) or (model_name != "mlp" and i == 0):
-            error0  = error
-            test_plot(regr, train_data, train_label, valid_data, valid_label, error)
+        # if (model_name == "mlp" and i == 1) or (model_name != "mlp" and i == 0):
+        # error0  = error
+        test_plot(regr, train_data, train_label, valid_data, valid_label, test_error)
+        print('Model: ',opt.model_name)
+        print('RMSE: ',test_error)
 
-    print(error_diff_seed)
-    diff = np.abs(np.array(error_diff_seed) - error0)
-    print(error0, diff.max())
 
     
 
