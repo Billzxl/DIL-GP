@@ -99,7 +99,8 @@ def get_dataset(dataset_name, s):
     train_label = torch.cat([y, y2[:15]], dim=0)
     valid_data = X2[20:]
     valid_label = y2[20:]
-
+    # print(train_data.shape,train_label.shape,valid_data.shape,valid_label.shape)
+    # assert 0
     return train_data, train_label, valid_data, valid_label
 
 

@@ -27,7 +27,7 @@ parser.add_argument('--model_name',
                     type=str)
 parser.add_argument('--envlr',
                     help='learning rate for env_w',
-                    default=0.0001,
+                    default=0.001,
                     type=float)
 parser.add_argument('--gplr',
                     help='learning rate for gp parameters',
@@ -35,7 +35,7 @@ parser.add_argument('--gplr',
                     type=float)
 parser.add_argument('--epoch',
                     help='learning epoch for gp parameters',
-                    default=100,
+                    default=200,
                     type=int)
 parser.add_argument('--eistep',
                     help='number of steps for ei step',
@@ -43,7 +43,7 @@ parser.add_argument('--eistep',
                     type=int)
 parser.add_argument('--lambdae',
                     help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
-                    default=3,
+                    default=1,
                     type=float)
 parser.add_argument('--seed',
                     help='random seed',
@@ -79,7 +79,7 @@ def setup_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 # setup_seed(0)
-dataset_name = "auto_mobile"
+dataset_name = "syn2"
 # dataset_name = "housing_time_split"
 
 # dataset_name = "synthetic"
@@ -93,18 +93,14 @@ def test(gp, test_data, test_label):
 
     var = torch.clamp(var, min=1e-10, max=1e10)
     std = torch.sqrt(var)
-    dis  = Normal(mu.reshape(-1, 1), std.reshape(-1, 1))
 
-    log_ll = dis.log_prob(test_label)
-
-    mu = mu.detach().cpu().numpy().flatten()
-    std = torch.sqrt(var).detach().cpu().numpy().flatten()
+    mu = mu.detach().numpy().flatten()
+    std = torch.sqrt(var).detach().numpy().flatten()
     
-    # error = np.absolute(mu - test_label.numpy())
-    mse_error = np.square(mu - test_label.cpu().numpy().flatten())
+    mse_error = np.square(mu - test_label.numpy().flatten())
     error = np.sqrt(mse_error.mean())
 
-    test_label = test_label.cpu().numpy().flatten()
+    test_label = test_label.numpy().flatten()
     mu_up = mu + std
     mu_down = mu - std
     smaller_than_up = (test_label < mu_up)
@@ -112,7 +108,7 @@ def test(gp, test_data, test_label):
 
     ratio = ((smaller_than_up & larger_than_down) * 1.0).sum() / len(test_label)
 
-    return error, std.mean(), ratio, log_ll.mean().detach().cpu().numpy()
+    return error,  ratio
 
 
 
@@ -151,21 +147,20 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
         plt.cla()
 
 
-
 def main():
     global opt
     train_data, train_label, valid_data, valid_label,_ = get_dataset(dataset_name)
-    train_data, train_label, valid_data, valid_label = [item.to(device) for item in \
-                                                        [train_data, train_label, valid_data, valid_label]]
+    # train_data, train_label, valid_data, valid_label = [item.to(device) for item in \
+    #                                                     [train_data, train_label, valid_data, valid_label]]
     
-    error_diff_seed = []
-    ratio_diff_seed = []
-    ll_diff_seed = []
-    std_diff_seed = []
-    error0 = None
-    ratio0 = None
-    ll0 = None
-    std0 = None
+    # error_diff_seed = []
+    # ratio_diff_seed = []
+    # ll_diff_seed = []
+    # std_diff_seed = []
+    # error0 = None
+    # ratio0 = None
+    # ll0 = None
+    # std0 = None
     # gplrs = [0.1, 0.06, 0.03, 0.01]
     # gplrs = [0.06]
     # for i, gplr in enumerate(gplrs):
@@ -175,31 +170,99 @@ def main():
     # TODO： add classification
     if model_name == 'dilgp':
         gp = DILGP(opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,
-                opt.length_scale, opt.noise_scale, opt.amplitude_scale).to(device)
+                opt.length_scale, opt.noise_scale, opt.amplitude_scale)
     else:
         # opt.gplr = opt.gplr * 0.3
-        gp = GP(opt.length_scale, opt.noise_scale, opt.amplitude_scale).to(device)
+        gp = GP(opt.length_scale, opt.noise_scale, opt.amplitude_scale)
     
-    optimizer = SGD(gp.parameters(), nesterov=False, momentum=0.01, lr=opt.gplr)
+    # optimizer = SGD(gp.parameters(), nesterov=False, momentum=0.01, lr=opt.gplr)
+    optimizer = SGD(gp.parameters(), lr=opt.gplr)
     # optimizer = torch.optim.Rprop(gp.parameters(), lr=opt.gplr*10)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=100)
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=100)
 
     gp.fit(train_data, train_label)
 
     # gp.initialize(train_data, train_label, optimizer)
 
-    optimizer = SGD(gp.parameters(), nesterov=False, momentum=0.01, lr=opt.gplr)
+    # optimizer = SGD(gp.parameters(), nesterov=False, momentum=0.01, lr=opt.gplr)
+    
+    
+    # gp.fit(train_data, train_label)
 
-    for i in trange(opt.epoch):
-        d_train = gp.train_step(train_data, train_label, optimizer)
+    for i in tqdm(range(opt.epoch)):
+        gp.train_step(train_data, train_label, optimizer)
 
     with torch.no_grad():
-        test_error, test_std, ratio, ll = test(gp, valid_data, valid_label)
+        test_error,ratio= test(gp, valid_data, valid_label)
+
+    # plot(gp, train_data, train_label, valid_data, valid_label, test_error)
 
     print('Model: ',opt.model_name)
     print('RMSE: ',test_error)
-    print('Coverage Rate: ', ratio) 
+    print('Coverage Rate: ', ratio)
     
+    
+
+    # l_error = []; l_std = []
+    # l_ratio = []; l_ll = []
+    # for i in trange(opt.epoch):
+    #     d_train = gp.train_step(train_data, train_label, optimizer)
+
+    #     with torch.no_grad():
+    #         test_error, test_std, ratio, ll = test(gp, valid_data, valid_label)
+    #         l_error.append(test_error.mean())
+    #         l_std.append(test_std.mean())
+    #         l_ratio.append(ratio)
+    #         l_ll.append(ll)
+
+    #     # scheduler.step()
+    #     # if i % 2 == 0:
+    #     #     print('error', l_error[-1])
+
+    # error_idx = np.argmin(np.array(l_error))
+    # error = l_error[error_idx]
+    # ratio = l_ratio[error_idx]
+    # ll = l_ll[error_idx]
+    # test_std = l_std[error_idx]
+    # # print(error)
+
+    # error_diff_seed.append(error)
+    # ratio_diff_seed.append(ratio)
+    # ll_diff_seed.append(ll)
+    # std_diff_seed.append(test_std)
+    # # print(error, ratio, ll, test_std)
+    
+    # print('Model: ',opt.model_name)
+    # print('RMSE: ',l_error[-1])
+    # print('Coverage Rate: ', l_ratio[-1])
+
+        # if np.abs(gplr - 0.1) < 1e-10:
+        #     error0  = error
+        #     ratio0 = ratio
+        #     ll0 = ll
+        #     std0 = test_std
+
+    # test_plot(gp, train_data, train_label, valid_data, valid_label, error)
+    # print(error_diff_seed)
+    # diff = np.abs(np.array(error_diff_seed) - error0)
+    # print('error', error0, diff.max())
+
+    # diff = np.abs(np.array(ratio_diff_seed) - ratio0)
+    # print('ratio', ratio0, diff.max())
+
+    # diff = np.abs(np.array(ll_diff_seed) - ll0)
+    # print('ll', ll0, diff.max())
+
+    # diff = np.abs(np.array(std_diff_seed) - std0)
+    # print('std', std0, diff.max())
+
+    # import pickle
+    # saved = (gp.env_w.detach().cpu().numpy(), train_names)
+    # with open('saved_names.pkl', 'wb') as f:
+    #     pickle.dump(saved, f)
+
+
+
 
 if __name__ == "__main__":
     main()

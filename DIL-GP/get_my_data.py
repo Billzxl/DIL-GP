@@ -25,34 +25,113 @@ def get_dataset(dataset_name):
     setup_seed(0)
     train_names = None
     
-    if dataset_name == "synthetic":
+    if dataset_name == "syn1":
         X = torch.randn(100,1)
         f = torch.sin(X * 2 * np.pi /4).flatten()
         y = f + torch.randn_like(f) * 0.1
         y = y[:,None] * 3
 
-        X2 = torch.randn(100,1) + 6.0
-        f = -torch.sin((X2-6.0) * 2 * np.pi / 64).flatten()
+        X2 = torch.randn(100,1) + 6.5
+        f = -torch.sin((X2-6.5) * 2 * np.pi / 64).flatten()
+        # print(max(f))
+        # print(min(f))
         y2 = f + torch.randn_like(f) * 0.1 + 0.5
         y2 = y2[:,None]
+        print(max(y2))
+        print(min(y2))
 
         train_data = torch.cat([X, X2[:15]], dim=0)
         train_label = torch.cat([y, y2[:15]], dim=0)
-        train_names = [1 for i in range(100)] + [0 for i in range(15)]
         valid_data = X2[20:]
         valid_label = y2[20:]
-    
+        # print(y2)
+        # print('train_data',train_data)
+        # print('train_label',train_label)
+        # print("valid_data",valid_data)
+        # print("valid_label",valid_label)
+        # assert 0
     
     elif dataset_name == "syn2":
-        
-        T1 = 0.2
-        a1 = 1/T1
-        T2 = 0.2
-        a2 = 1/T2
-        k = 1
+         
+        a1 = 30
+        b1 = 20
+        a2 = 50
+        b2 = 20
 
-        b1 = 2*k*np.pi+np.pi/2-0.3*a1
-        b2 = 2*k*np.pi+np.pi/2-0.7*a2
+        mean1 = [0.3, 0.3]
+        cov1 = [[0.01, 0], [0, 0.01]]
+        x1, y1 = np.random.multivariate_normal(mean1, cov1, 100).T
+        x1 = torch.Tensor(x1).unsqueeze(1)
+        y1 = torch.Tensor(y1).unsqueeze(1)
+        z = 1.5*np.sin(x1 * a1 + b1) + 1.5*np.sin(y1 * a1 + b1) + torch.randn_like(x1) * 0.1
+        X = torch.cat((x1,y1),dim=1)
+
+
+        mean2 = [0.7, 0.7]
+        cov2 = [[0.01, 0], [0, 0.01]]
+        x2, y2 = np.random.multivariate_normal(mean2, cov2, 100).T
+        x2 = torch.Tensor(x2).unsqueeze(1)
+        y2 = torch.Tensor(y2).unsqueeze(1)
+        z2 = 0.5*np.sin(x2*a2+b2) + 0.5*np.sin(y2*a2+b2) + torch.randn_like(x2) * 0.05 + 1.1
+        
+        # print('max',max(z2))
+        # print('min',min(z2))
+        
+        # min_val = min(z2)
+        # max_val = max(z2)
+        # z2 = (z2 - min_val) / (max_val - min_val)
+        # print(max(z2))
+        # print(min(z2))
+        # assert 0
+        X2 = torch.cat((x2,y2),dim=1)
+
+        train_data = torch.cat([X, X2[:15]], dim=0)
+        train_label = torch.cat([z, z2[:15]], dim=0)
+        valid_data = X2[20:]
+        valid_label = z2[20:]       
+        
+        # n = 100
+        # x = torch.linspace(0, 1, n)
+        # y = torch.linspace(0, 1, n)
+
+        # # 使用 torch.meshgrid() 生成网格点坐标
+        # xx, yy = torch.meshgrid(x, y)
+        # xx = xx.reshape(-1, 1)
+        # yy = yy.reshape(-1, 1)
+        # # print(xx)
+        # # print(yy)
+        # # assert 0
+        # label = 2*np.sin(xx*a2+b2) + 4*np.sin(yy*a2+b2) + torch.randn_like(yy) * 0.05
+        # # 将 xx 和 yy 拼接成一个 (n**2, 2) 的 Tensor
+        # data = torch.cat((xx, yy), dim=1)
+
+        # # 按照步长 t 对 points 进行缩放
+        # points = points * t
+
+        # 打印生成的 Tensor
+        # print(points)
+
+        # x_domain1, y_domain1 = train_data,train_label
+        # x_domain2, y_domain2 = valid_data ,valid_label
+
+
+        # valid_data = data
+        # valid_label = label
+    elif dataset_name == "syn2old":
+        
+        # T1 = 0.2
+        # a1 = 1/T1
+        # T2 = 0.2
+        # a2 = 1/T2
+        # k = 1
+
+        # b1 = 2*k*np.pi+np.pi/2-0.3*a1
+        # b2 = 2*k*np.pi+np.pi/2-0.7*a2
+        
+        a1 = 3
+        b1 = 2
+        a2 = 5
+        b2 = 2
 
         # 生成两个高斯分布
         mean1 = [0.3, 0.3]

@@ -26,7 +26,7 @@ parser.add_argument('--gplr',
                     type=float)
 parser.add_argument('--epoch',
                     help='learning epoch for gp parameters',
-                    default=100,
+                    default=200,
                     type=int)
 parser.add_argument('--eistep',
                     help='number of steps for ei step',
