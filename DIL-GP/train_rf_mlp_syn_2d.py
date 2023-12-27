@@ -126,7 +126,7 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
 
 def main():
     global opt
-    train_data, train_label, valid_data, valid_label,_ = get_dataset(dataset_name)
+    train_data, train_label, valid_data, valid_label,_ = get_dataset("auto_mobile")
     train_data, train_label, valid_data, valid_label = \
         train_data.numpy(), train_label.numpy(), valid_data.numpy(), valid_label.numpy()
 
@@ -136,7 +136,7 @@ def main():
     if model_name == "mlp":
         regr = MLPRegressor(hidden_layer_sizes=(64, 64, 64), random_state=opt.seed, max_iter=5000).fit(train_data, train_label)
     else:
-        regr = RandomForestRegressor(n_estimators=50, random_state=opt.seed)
+        regr = RandomForestRegressor(n_estimators=50, random_state=opt.seed,max_features = 'log2')
 
     regr.fit(train_data, train_label)
 
