@@ -75,9 +75,9 @@ def setup_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-# setup_seed(0)
+
 dataset_name = 'synthetic'
-# model_name = 'mlp'
+
 model_name = opt.model_name
 
 
@@ -170,39 +170,17 @@ def main():
 
     setup_seed(opt.seed)
 
-    # error_diff_seed = []
-    # error0 = None
     for i in range(1):
         if model_name == "mlp":
             regr = MLPRegressor(hidden_layer_sizes=(64, 64, 64), random_state=i, max_iter=5000).fit(train_data, train_label)
-            # regr = MLPRegressor(random_state=1, max_iter=500,hidden_layer_sizes=).fit(train_data, train_label)
+
         else:
             regr = RandomForestRegressor(n_estimators=50, random_state=i)
 
         regr.fit(train_data, train_label)
 
-        # l_error = [];
         test_error = test(regr, valid_data, valid_label)
-        # l_error.append(test_error.mean())
 
-        # error = l_error[-1]
-
-        # fig, axs = plt.subplots(ncols=5, figsize=(20,4))
-        # axs[4].plot(np.stack(l_error)); axs[4].set_title('Valid Error'); axs[4].set_xlabel('iteration');
-
-
-        # if model_name == "mlp":
-        #     plt.savefig('debug/train_mlp.png')
-        # else:
-        #     plt.savefig('debug/train_gp_regr.png')
-        
-        # plt.cla()
-
-        # error_diff_seed.append(error)
-        # print(error)
-
-        # if (model_name == "mlp" and i == 1) or (model_name != "mlp" and i == 0):
-        # error0  = error
         test_plot(regr, train_data, train_label, valid_data, valid_label, test_error)
         print('Model: ',opt.model_name)
         print('RMSE: ',test_error)

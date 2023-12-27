@@ -44,7 +44,7 @@ parser.add_argument('--lambdae',
                     type=float)
 parser.add_argument('--seed',
                     help='random seed',
-                    default=0,
+                    default=1,
                     type=int)
 parser.add_argument('--usekmeans',
                     help='whether use kmeans to initialize env_w',
@@ -75,10 +75,8 @@ def setup_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-# setup_seed(0)
-# dataset_name = 'diabetes'
-# dataset_name = 'auto_mobile'
-dataset_name = 'housing_time_split'
+
+dataset_name = "syn2"
 model_name = opt.model_name
 
 
@@ -128,53 +126,24 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
 
 def main():
     global opt
-    train_data, train_label, valid_data, valid_label,_ = get_dataset('auto_mobile')
+    train_data, train_label, valid_data, valid_label,_ = get_dataset(dataset_name)
     train_data, train_label, valid_data, valid_label = \
         train_data.numpy(), train_label.numpy(), valid_data.numpy(), valid_label.numpy()
 
     setup_seed(opt.seed)
 
-    error_diff_seed = []
-    error0 = None
-    for i in range(1):
-        if model_name == "mlp":
-            regr = MLPRegressor(hidden_layer_sizes=(64, 64, 64), random_state=i, max_iter=5000).fit(train_data, train_label)
-            # regr = MLPRegressor(random_state=1, max_iter=500,hidden_layer_sizes=).fit(train_data, train_label)
-        else:
-            regr = RandomForestRegressor(n_estimators=50, random_state=i)
 
-        regr.fit(train_data, train_label)
+    if model_name == "mlp":
+        regr = MLPRegressor(hidden_layer_sizes=(64, 64, 64), random_state=opt.seed, max_iter=5000).fit(train_data, train_label)
+    else:
+        regr = RandomForestRegressor(n_estimators=50, random_state=opt.seed)
 
-        # l_error = [];
-        test_error = test(regr, valid_data, valid_label)
-        # l_error.append(test_error.mean())
+    regr.fit(train_data, train_label)
 
-        # error = l_error[-1]
-        # test_plot(regr, train_data, train_label, valid_data, valid_label, error)
-        # fig, axs = plt.subplots(ncols=5, figsize=(20,4))
-        # axs[4].plot(np.stack(l_error)); axs[4].set_title('Valid Error'); axs[4].set_xlabel('iteration');
+    test_error = test(regr, valid_data, valid_label)
 
-        # if model_name == "mlp":
-        #     plt.savefig('debug/train_mlp.png')
-        # else:
-        #     plt.savefig('debug/train_gp_regr.png')
-        print('Model: ',opt.model_name)
-        print('RMSE: ',test_error)   
-        # plt.cla()
-
-        # error_diff_seed.append(error)
-        # print(error)
-
-        # if (model_name == "mlp" and i == 1) or (model_name != "mlp" and i == 0):
-        #     error0  = error
-
-    # print(error_diff_seed)
-    # diff = np.abs(np.array(error_diff_seed) - error0)
-    # print(error0, diff.max())
-
-    
-
-
+    print('Model: ',opt.model_name)
+    print('RMSE: ',test_error)   
 
 
 if __name__ == "__main__":

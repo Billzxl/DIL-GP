@@ -79,7 +79,6 @@ def setup_seed(seed):
     # torch.backends.cudnn.benchmark = False
     # torch.backends.cudnn.deterministic = True
 
-# setup_seed(0)
 
 
 
@@ -182,8 +181,7 @@ def plot(gp, train_data, train_label, test_data, test_label, error):
     
     plt.subplots(figsize=(8, 1))
     plt.ylim(-4, 3)
-    # print(type(mu))
-    # print(type(gt1))
+
     plt.plot(grid1.flatten(), mu1-gt1, color='purple', linewidth=2,alpha=1)
     plt.plot(grid2.flatten(), mu2-gt2, color='purple', linewidth=2,alpha=1)
     plt.fill_between(grid1.flatten(), y1=mu1-gt1, y2=0, alpha=0.5, color='mediumslateblue')
@@ -197,7 +195,7 @@ def plot(gp, train_data, train_label, test_data, test_label, error):
 def main():
     global opt
 
-    train_data, train_label, valid_data, valid_label = get_dataset('abc',0)
+    train_data, train_label, valid_data, valid_label = get_dataset(opt.dataset_name,0)
     setup_seed(opt.seed)
 
     if opt.model_name == 'dilgp':

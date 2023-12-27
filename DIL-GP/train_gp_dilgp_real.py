@@ -78,11 +78,9 @@ def setup_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-# setup_seed(0)
-dataset_name = "auto_mobile"
-# dataset_name = "housing_time_split"
 
-# dataset_name = "synthetic"
+dataset_name = "auto_mobile"
+
 model_name = opt.model_name
 device = torch.device('cuda') # or torch.device('cpu')
 
@@ -158,35 +156,17 @@ def main():
     train_data, train_label, valid_data, valid_label = [item.to(device) for item in \
                                                         [train_data, train_label, valid_data, valid_label]]
     
-    error_diff_seed = []
-    ratio_diff_seed = []
-    ll_diff_seed = []
-    std_diff_seed = []
-    error0 = None
-    ratio0 = None
-    ll0 = None
-    std0 = None
-    # gplrs = [0.1, 0.06, 0.03, 0.01]
-    # gplrs = [0.06]
-    # for i, gplr in enumerate(gplrs):
-    # opt.gplr = gplr
     setup_seed(opt.seed)
-    # ONLY for regression !
-    # TODO： add classification
+
     if model_name == 'dilgp':
         gp = DILGP(opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,
                 opt.length_scale, opt.noise_scale, opt.amplitude_scale).to(device)
     else:
-        # opt.gplr = opt.gplr * 0.3
         gp = GP(opt.length_scale, opt.noise_scale, opt.amplitude_scale).to(device)
     
     optimizer = SGD(gp.parameters(), nesterov=False, momentum=0.01, lr=opt.gplr)
-    # optimizer = torch.optim.Rprop(gp.parameters(), lr=opt.gplr*10)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer,T_0=100)
 
     gp.fit(train_data, train_label)
-
-    # gp.initialize(train_data, train_label, optimizer)
 
     optimizer = SGD(gp.parameters(), nesterov=False, momentum=0.01, lr=opt.gplr)
 

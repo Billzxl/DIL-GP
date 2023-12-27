@@ -75,11 +75,9 @@ def setup_seed(seed):
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
-# setup_seed(0)
-# dataset_name = 'diabetes'
+
 dataset_name = 'auto_mobile'
-# dataset_name = 'housing_time_split'
-# dataset_name = 'syn2'
+
 model_name = opt.model_name
 
 
@@ -146,15 +144,8 @@ def main():
 
     test_error = test(regr, valid_data, valid_label)
 
-
-
     print('Model: ',opt.model_name)
     print('RMSE: ',test_error)   
-
-
-
-    
-
 
 
 

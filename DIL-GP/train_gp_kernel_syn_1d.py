@@ -34,7 +34,7 @@ parser.add_argument('--eistep',
                     type=int)
 parser.add_argument('--lambdae',
                     help='lambda coefficient, loss = marginal_likelihood + npenalty * lambda',
-                    default=0.5,
+                    default=0,
                     type=float)
 parser.add_argument('--seed',
                     help='random seed',
@@ -188,24 +188,12 @@ def main():
     global opt
     train_data, train_label, valid_data, valid_label = get_dataset(dataset_name)
 
-    error_diff_seed = []
-    ratio_diff_seed = []
-    ll_diff_seed = []
-    std_diff_seed = []
-    error0 = None
-    ratio0 = None
-    ll0 = None
-    std0 = None
-    # gplrs = [0.01, 0.003, 0.001, 0.0003, 0.0001]
-    # # gplrs = [0.001]
-    # for i, gplr in enumerate(gplrs):
-        # opt.gplr = gplr
+
     plt.rcParams.update({'font.size': 18})
     setup_seed(opt.seed)
-    # ONLY for regression !
-    # TODO： add classification
+
     kernel = eval(opt.kernel)()
-    # kernel = Matern(length_scale=1.0, length_scale_bounds=(1e-05, 100000.0), nu=2.5)
+
     gp = DILGPKernel(kernel, opt.envlr, opt.eistep, opt.lambdae, opt.usekmeans,)#.cuda()
 
     optimizer = SGD(gp.parameters(), lr=opt.gplr)

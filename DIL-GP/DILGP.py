@@ -6,7 +6,6 @@ from torch import autograd
 from sklearn.cluster import KMeans
 from tqdm import tqdm
 
-#envlr=1e-3
 class DILGP(nn.Module):
     def __init__(self, envlr=0.1, eistep=3, lambdae=0.5, use_kmeans=True,
                 length_scale=1.0, noise_scale=1.0, amplitude_scale=1.0):
