@@ -62,6 +62,11 @@ parser.add_argument('--amplitude_scale',
                     help='initialization of amplitude_scale',
                     default=1.0,
                     type=float)
+parser.add_argument('--dataset_name',
+                    help='choose dataset',
+                    default='auto_mobile',
+                    choices= ['auto_mobile'],
+                    type=str)
 opt = parser.parse_args()
 
 
@@ -126,7 +131,7 @@ def test_plot(gp, train_data, train_label, test_data, test_label, error):
 
 def main():
     global opt
-    train_data, train_label, valid_data, valid_label,_ = get_dataset("auto_mobile")
+    train_data, train_label, valid_data, valid_label,_ = get_dataset(opt.dataset_name)
     train_data, train_label, valid_data, valid_label = \
         train_data.numpy(), train_label.numpy(), valid_data.numpy(), valid_label.numpy()
 
