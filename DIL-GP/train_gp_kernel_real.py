@@ -66,7 +66,11 @@ parser.add_argument('--kernel',
                     default='RationalQuadraticKernel',
                     # default='DotProductKernel',
                     type=str)
-
+parser.add_argument('--dataset_name',
+                    help='choose dataset',
+                    default='auto_mobile',
+                    choices= ['auto_mobile'],
+                    type=str)
 opt = parser.parse_args()
 
 
